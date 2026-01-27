@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OMR Mobile Scanner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-weight: 600;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+
+        .upload-card {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .results {
+            margin-top: 30px;
+            width: 100%;
+            max-width: 500px;
+            display: none;
+        }
+
+        .result-item {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .vis-container {
+            width: 100%;
+            margin-top: 15px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .vis-container img {
+            width: 100%;
+            display: block;
+        }
+
+        .ans-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .ans-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .ans-box span {
+            display: block;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .error {
+            color: var(--danger);
+            margin-top: 15px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>OMR Scanner</h1>
+
+    <div class="upload-card">
+        <p>Chụp ảnh phiếu trả lời để chấm điểm ngay lập tức</p>
+        <button class="btn" onclick="document.getElementById('fileInput').click()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            Quét Phiếu
+        </button>
+        <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="uploadImage()">
+
+        <div class="loading" id="loader">
+            <div class="spinner"></div>
+            <p>Đang xử lý bằng AI...</p>
+        </div>
+        <div class="error" id="errorMsg"></div>
+    </div>
+
+    <div class="results" id="resultsArea">
+        <!-- SBD & Made -->
+        <div class="result-item">
+            <p><strong>SBD:</strong> <span id="resSbd" style="color:var(--success)"></span></p>
+            <p><strong>Mã đề:</strong> <span id="resMade" style="color:var(--success)"></span></p>
+            <div id="visSbd" class="vis-container"></div>
+            <div id="visMade" class="vis-container" style="margin-top:10px"></div>
+        </div>
+
+        <!-- Answers -->
+        <div class="result-item">
+            <p><strong>Đáp án trích xuất:</strong></p>
+            <div class="ans-grid" id="ansGrid"></div>
+            <div id="visAns" class="vis-container"></div>
+        </div>
+    </div>
+
+    <script>
+        async function uploadImage() {
+            const fileInput = document.getElementById('fileInput');
+            const loader = document.getElementById('loader');
+            const resultsArea = document.getElementById('resultsArea');
+            const errorMsg = document.getElementById('errorMsg');
+
+            if (!fileInput.files[0]) return;
+
+            // Reset UI
+            loader.style.display = 'block';
+            resultsArea.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                displayResults(data);
+
+            } catch (err) {
+                errorMsg.innerText = "Lỗi: " + err.message;
+                errorMsg.style.display = 'block';
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        function displayResults(data) {
+            const resultsArea = document.getElementById('resultsArea');
+            document.getElementById('resSbd').innerText = data.sbd || 'N/A';
+            document.getElementById('resMade').innerText = data.made || 'N/A';
+
+            // Visualizations
+            const visSbd = document.getElementById('visSbd');
+            visSbd.innerHTML = data.visualizations.sbd ? `<img src="data:image/jpeg;base64,${data.visualizations.sbd}">` : '';
+
+            const visMade = document.getElementById('visMade');
+            visMade.innerHTML = data.visualizations.made ? `<img src="data:image/jpeg;base64,${data.visualizations.made}">` : '';
+
+            const visAns = document.getElementById('visAns');
+            visAns.innerHTML = '';
+            Object.keys(data.visualizations).slice().sort().forEach(key => {
+                if (key.startsWith('ans_')) {
+                    visAns.innerHTML += `<img src="data:image/jpeg;base64,${data.visualizations[key]}" style="margin-bottom:10px">`;
+                }
+            });
+
+            // Answers Grid (Raw only)
+            const ansGrid = document.getElementById('ansGrid');
+            ansGrid.innerHTML = '';
+            if (data.answers && data.answers.length > 0) {
+                data.answers.forEach((item) => {
+                    ansGrid.innerHTML += `
+                        <div class="ans-box">
+                            Q${item.q}
+                            <span>${item.a}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                ansGrid.innerHTML = '<p style="grid-column: 1/-1; opacity:0.5">Không tìm thấy đáp án nào</p>';
+            }
+
+            resultsArea.style.display = 'block';
+            resultsArea.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+
+</html>

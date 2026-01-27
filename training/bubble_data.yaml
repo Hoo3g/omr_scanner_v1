@@ -1,0 +1,9 @@
+
+path: /home/h003g/IdeaProjects/scan_question/dataset_bubble_ai
+train: images
+val: images
+
+names:
+  0: num
+  1: empty
+  2: filled
