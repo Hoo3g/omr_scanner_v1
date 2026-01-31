@@ -15,6 +15,14 @@ names:
 
 # 2. Train the model
 def train_bubble_model():
+    # --- ACTIVE LEARNING: Merge new data from App collection ---
+    try:
+        from merge_data import merge_refined_data
+        merge_refined_data()
+    except ImportError:
+        print("Notice: merge_data.py not found in the same directory, skipping merge step.")
+    # ----------------------------------------------------------
+
     model = YOLO("yolo11n.pt") # Use regular YOLO11n for bubbles
     model.train(
         data="bubble_data.yaml",

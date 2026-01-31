@@ -1,0 +1,7 @@
+path: /home/h003g/IdeaProjects/scan_question/dataset_real_aug
+train: images
+val: images # For simplicity using same as val for now, or user can split later
+
+names:
+  0: empty
+  1: filled

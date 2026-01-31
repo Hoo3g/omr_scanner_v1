@@ -1,0 +1,10 @@
+# YOLO Dataset Configuration
+path: /home/h003g/IdeaProjects/scan_question/omr_scanner_v1/data
+train: images
+val: images
+
+names:
+  0: info
+  1: sbd
+  2: made
+  3: ans

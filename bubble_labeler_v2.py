@@ -6,15 +6,17 @@ import argparse
 # Configuration
 defaults = {
     "CROP_DIR": "crops",
-    "LABEL_DIR": "dataset_bubble_ai/labels",
-    "IMAGE_OUT_DIR": "dataset_bubble_ai/images"
+    "LABEL_DIR": "omr_scanner_v1/dataset_bubble_ai/labels",
+    "IMAGE_OUT_DIR": "omr_scanner_v1/dataset_bubble_ai/images"
 }
 
-# Check for collected_data as a convenient default
-if os.path.exists("collected_data/images"):
-    defaults["CROP_DIR"] = "collected_data/images"
-    defaults["LABEL_DIR"] = "collected_data/labels"
-    defaults["IMAGE_OUT_DIR"] = "collected_data/images_refined"
+# Check for collected_data_root as a convenient default
+for folder in ["collected_data_root", "omr_scanner_v1/collected_data_root"]:
+    if os.path.exists(os.path.join(folder, "images")):
+        defaults["CROP_DIR"] = os.path.join(folder, "images")
+        defaults["LABEL_DIR"] = os.path.join(folder, "labels")
+        defaults["IMAGE_OUT_DIR"] = os.path.join(folder, "images_refined")
+        break
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--img_dir", default=defaults["CROP_DIR"])

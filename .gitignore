@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# AI Models & Runs
+*.pt
+runs/
+checkpoints/
+
+# OMR Data (Relative to this folder)
+data/images/
+data/labels/
+dataset_bubble_ai/images/
+dataset_bubble_ai/labels/
+collected_data_root/images/
+collected_data_root/labels/
+collected_data_root/images_refined/
+collected_data_root/archive/
+uploads/
+crops/
+
+# Local images/results
+*.jpg
+*.jpeg
+*.png
+*.pdf
+!templates/*.png  # Keep template assets
+!templates/*.jpg
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Templates
+*.json
+!templates/*.json
+!template_test_*.json

@@ -110,7 +110,14 @@ class OMRPipeline:
                 })
         return results
 
-    def save_crop_data(self, crop, bubbles, label, base_name, folder="collected_data"):
+    def save_crop_data(self, crop, bubbles, label, base_name, folder=None):
+        if folder is None:
+            # Tự động tìm folder đúng dù chạy từ root hay từ trong omr_scanner_v1
+            if os.path.exists("collected_data_root"):
+                folder = "collected_data_root"
+            else:
+                folder = "omr_scanner_v1/collected_data_root"
+        
         """Save crop image and YOLO labels for refinement."""
         img_dir = os.path.join(folder, "images")
         lbl_dir = os.path.join(folder, "labels")
